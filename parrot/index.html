@@ -4,32 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>鹦鹉走绳索 · 从家出发</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="game.js" defer></script>
+  <link rel="stylesheet" href="style.css?v=overhead">
+  <script src="game.js?v=overhead" defer></script>
 </head>
 <body>
 <main>
   <header><a href="../">‹ 地下迷宫</a><h1>陪鹦鹉走绳索</h1></header>
-  <svg id="scene" viewBox="0 0 360 300" aria-label="窗边的鹦鹉、两段绳索和终点的水碗" role="img">
-    <rect width="360" height="300" fill="#eee0c3"/>
-    <path d="M0 245H360V300H0" fill="#caa476"/>
-    <rect x="85" y="19" width="190" height="130" rx="12" fill="#a8c8b8" stroke="#aa865e" stroke-width="8"/>
-    <path d="M180 24V146M90 85H271" stroke="#fff2cf" stroke-width="5"/>
-    <path id="curtain" d="M85 16H122L118 150Q97 162 78 150Z" fill="#d8896e"/>
-    <path d="M48 217V269M180 188V269M312 217V269" stroke="#93643f" stroke-width="9"/>
-    <path id="rope" d="M48 213Q115 204 180 184Q245 204 312 213" fill="none" stroke="#7a5039" stroke-width="4"/>
-    <path d="M31 213H64M162 184H198M289 213H339" stroke="#94643c" stroke-width="9" stroke-linecap="round"/>
-    <path d="M318 201H341L337 211H322Z" fill="#638d99"/><ellipse cx="329.5" cy="201" rx="11.5" ry="3" fill="#a7d5dd"/>
+  <svg id="scene" viewBox="0 0 280 500" aria-label="从上方俯看钢丝。鹦鹉从画面下方走向上方的水碗。" role="img">
+    <rect width="280" height="500" rx="15" fill="#eee0c3"/>
+    <path d="M0 87H280M0 166H280M0 245H280M0 324H280M0 403H280" stroke="#d9c29d" stroke-width="2"/>
+    <rect x="67" y="28" width="146" height="444" rx="70" fill="#d0dac3" stroke="#a9b69c" stroke-width="3"/>
+    <path d="M82 83V412M198 83V412" stroke="#e4ebd6" stroke-width="2" stroke-dasharray="5 8"/>
+    <path id="curtain" d="M232 32H261V135Q247 144 226 134Z" fill="#d8896e"/>
+    <path id="rope" d="M140 431Q140 338 140 250Q140 159 140 69" fill="none" stroke="#69594e" stroke-width="4"/>
+    <path d="M108 431H172M106 250H174M108 69H172" stroke="#986b43" stroke-width="12" stroke-linecap="round"/>
+    <circle cx="140" cy="38" r="15" fill="#547e83" stroke="#a9d3d0" stroke-width="4"/>
+    <path d="M132 38Q140 32 148 38" fill="none" stroke="#d3ede6" stroke-width="2"/>
     <g id="bird">
-      <path d="M-8 -26L-24 -12L-19 -34" fill="#456c60"/>
-      <path d="M-6 0v-8M4 0v-8" stroke="#9f642f" stroke-width="3" stroke-linecap="round"/>
-      <ellipse cy="-23" rx="17" ry="19" fill="#65a76e"/>
-      <ellipse id="wing" cx="-6" cy="-23" rx="10" ry="13" fill="#38745f"/>
-      <circle cx="8" cy="-41" r="14" fill="#92ba70"/>
-      <circle cx="14" cy="-43" r="4" fill="#fff3cf"/><circle cx="15" cy="-43" r="2" fill="#292a25"/>
-      <path d="M20 -41Q32 -39 23 -33L18 -35" fill="#dc9a45"/>
+      <path d="M-6 5L-4 25L0 21L4 25L6 5" fill="#456c60"/>
+      <ellipse rx="13" ry="19" fill="#65a76e"/>
+      <g id="wing" fill="#38745f"><ellipse cx="-10" cy="2" rx="7" ry="13"/><ellipse cx="10" cy="2" rx="7" ry="13"/></g>
+      <circle cy="-14" r="11" fill="#92ba70"/>
+      <circle cx="-6" cy="-17" r="2" fill="#292a25"/><circle cx="6" cy="-17" r="2" fill="#292a25"/>
+      <path d="M-4 -22Q0 -31 4 -22L0 -19Z" fill="#dc9a45"/>
     </g>
-    <text id="arrow" x="180" y="67" text-anchor="middle"></text>
+    <text id="arrow" x="208" y="240" text-anchor="middle"></text>
   </svg>
   <p id="progress">客厅 · 窗边</p>
   <p id="status" role="status">鹦鹉站在窗边。要陪它走到水碗旁吗？</p>
@@ -38,7 +37,7 @@
     <button type="button" id="left" aria-label="向左扶稳">← 向左扶</button>
     <button type="button" id="right" aria-label="向右扶稳">向右扶 →</button>
   </div>
-  <details><summary>操作提示</summary><p>鹦鹉往左歪，就向右扶。手机倾斜模式下，竖屏、屏幕朝上，像端小托盘一样轻轻倾斜。按钮可按住，电脑也可长按方向键。</p></details>
+  <details><summary>操作提示</summary><p>鹦鹉往左歪，就向右扶。手机倾斜模式下，竖屏、屏幕朝上，像端小托盘一样轻轻倾斜。按钮可按住，电脑也可长按方向键。扶正后把手机放回水平，或松开按键，鹦鹉才会继续走。</p></details>
 </main>
 </body>
 </html>

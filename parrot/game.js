@@ -4,12 +4,14 @@ const elements = Object.fromEntries(
   ["scene", "bird", "rope", "arrow", "progress", "status", "actions", "controls", "left", "right"]
     .map(id => [id, document.getElementById(id)]),
 );
-const platforms = [{ x: 48, y: 213 }, { x: 180, y: 184 }, { x: 312, y: 213 }];
+const platforms = [431, 250, 69];
+const neutralThreshold = .16;
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 
 let state = "room";
 let mode = "buttons";
 let practiced = false;
+let practiceCentered = false;
 let completed = false;
 let segment = 0;
 let position = 0;
@@ -101,6 +103,7 @@ function begin(inputMode) {
     if (practiced) {
       walk();
     } else {
+      practiceCentered = false;
       balance = -.61;
       show("practice", "鹦鹉往左歪了。向右扶，把它扶正。");
     }
@@ -154,7 +157,8 @@ function checkpoint() {
 function tick(dt, time) {
   if (state === "calibrating") {
     calibration.elapsed += dt;
-    if (orientation && time - orientation.time < 500) {
+    if (orientation && time - orientation.time < 500
+        && Math.abs(orientation.pitch) < 22 && Math.abs(orientation.roll) < 20) {
       if (!calibration.anchor || Math.abs(calibration.anchor.roll - orientation.roll) > 1.8
           || Math.abs(calibration.anchor.pitch - orientation.pitch) > 2.5) {
         calibration.anchor = orientation;
@@ -173,11 +177,19 @@ function tick(dt, time) {
   }
   const input = mode === "buttons" ? held : clamp(((orientation?.roll ?? baseline) - baseline) / 13, -1, 1);
   if (state === "practice") {
-    balance = clamp(balance + input * dt * 1.8, -1, 1);
-    if (Math.abs(balance) < .13) {
-      practiced = true;
-      balance = 0;
-      show("ready", "扶正了。把手机放回舒服的角度，再点「出发」。");
+    if (!practiceCentered) {
+      balance = clamp(balance + input * dt * 1.8, -1, 1);
+      if (Math.abs(balance) < .13) {
+        practiceCentered = true;
+        balance = 0;
+      }
+    }
+    if (practiceCentered) {
+      message(mode === "tilt" ? "扶正了。现在把手机放回水平。" : "扶正了。现在松开方向按钮。");
+      if (Math.abs(input) <= neutralThreshold) {
+        practiced = true;
+        show("ready", "准备好了。点「出发」，鹦鹉会自己往上走。");
+      }
     }
     return;
   }
@@ -200,27 +212,31 @@ function tick(dt, time) {
     show("retry", "鹦鹉飞回了最近的停歇点。准备好后再试。");
     return;
   }
-  steady = Math.abs(balance) < .34 ? steady + dt : 0;
+  const neutral = Math.abs(input) <= neutralThreshold;
+  steady = Math.abs(balance) < .34 && neutral ? steady + dt : 0;
   if (steady > .28) position += dt * .115;
   if (position >= 1) {
     position = 1;
     checkpoint();
   } else if (Math.abs(balance) > .42) {
     message(balance < 0 ? "鹦鹉向左歪，向右扶。" : "鹦鹉向右歪，向左扶。");
+  } else if (Math.abs(balance) < .34 && !neutral) {
+    message(mode === "tilt" ? "扶正了，把手机放回水平。" : "扶正了，松开方向按钮。");
   } else {
     message(warning ? "窗帘动了，风快来了。" : blowing ? "风吹过绳索了。" : "鹦鹉站稳后会继续往前走。");
   }
 }
 
 function draw(time) {
-  const a = platforms[segment];
-  const b = platforms[segment + 1];
+  const from = platforms[segment];
+  const to = platforms[segment + 1];
   const sway = state === "walking" ? Math.sin(time / 380) * 3 : 0;
-  const x = a.x + (b.x - a.x) * position;
-  const y = a.y + (b.y - a.y) * position + Math.sin(Math.PI * position) * (5 + sway);
+  const x = 140 + sway * Math.sin(Math.PI * position) + balance * 13;
+  const y = from + (to - from) * position;
   const pose = state === "done" && arrival < 1 ? (arrival < 0 ? -15 : 19) : balance * 38;
   elements.bird.setAttribute("transform", `translate(${x} ${y}) rotate(${pose})`);
-  elements.rope.setAttribute("d", `M48 213Q114 ${208 + sway} 180 184Q246 ${208 + sway} 312 213`);
+  elements.rope.setAttribute("d", `M140 431Q${140 + sway * 2} 340 140 250Q${140 + sway * 2} 160 140 69`);
+  elements.arrow.setAttribute("y", clamp(y, 48, 452));
   elements.scene.classList.toggle("warning", state === "walking" && gust > 0 && gust < .8);
   elements.scene.classList.toggle("gust", state === "walking" && gust >= .8 && gust < 3);
   elements.arrow.textContent = ["practice", "walking"].includes(state) && Math.abs(balance) > .42

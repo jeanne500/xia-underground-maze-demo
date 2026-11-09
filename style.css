@@ -7,7 +7,7 @@ main {
   margin: auto;
   padding: 8px 12px;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
   gap: 6px;
 }
 header { display: flex; align-items: end; justify-content: space-between; gap: 8px; }
@@ -21,6 +21,11 @@ button { min-height: 44px; padding: 5px 12px; border: 1px solid #a59775; border-
 .wall { fill: #334840; }
 .entry { fill: #6096a0; }
 .exit { fill: #72a781; }
-.player { fill: #bd4a34; stroke: #fff4d5; stroke-width: 2; }
+.player { pointer-events: none; fill: #bd4a34; stroke: #fff4d5; stroke-width: 2; }
 #status { color: #efd29f; min-height: 1.35em; }
 :focus-visible { outline: 2px solid #ffe4a8; outline-offset: 2px; }
+
+.directions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.directions button { touch-action: manipulation; font-size: 1.25rem; }
+.reachable { fill: #fff2bc; }
+.exit.reachable { fill: #a7db9a; }

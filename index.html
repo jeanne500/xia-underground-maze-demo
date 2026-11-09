@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>地下迷宫 · 从家出发</title>
-  <link rel="stylesheet" href="style.css?v=overhead">
-  <script src="game.js?v=overhead" defer></script>
+  <link rel="stylesheet" href="style.css?v=touch">
+  <script src="game.js?v=touch" defer></script>
 </head>
 <body>
   <main>
@@ -13,9 +13,15 @@
       <div><h1>地下迷宫</h1></div>
       <button type="button" id="reset">重新开始</button>
     </header>
-    <p class="instructions">从上方入口走到下方出口。点同一条直道上的空地，转弯后再点下一段。</p>
+    <p class="instructions">点亮色通道前进，或按方向按钮走一步。</p>
     <svg id="map" role="group" tabindex="0" aria-label="完整的俯视迷宫。可用方向键移动。"></svg>
-    <p id="status" role="status">入口在左上，出口在右下。也可以用方向键移动。</p>
+    <div class="directions" role="group" aria-label="移动方向">
+      <button type="button" data-direction="ArrowLeft" aria-label="向左">←</button>
+      <button type="button" data-direction="ArrowUp" aria-label="向上">↑</button>
+      <button type="button" data-direction="ArrowDown" aria-label="向下">↓</button>
+      <button type="button" data-direction="ArrowRight" aria-label="向右">→</button>
+    </div>
+    <p id="status" role="status">从左上角入口先往下走。</p>
   </main>
 </body>
 </html>

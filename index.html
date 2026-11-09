@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>地下管网迷宫 · 从家出发</title>
+  <link rel="stylesheet" href="style.css?v=single-screen">
+  <script src="game.js?v=single-screen" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <a href="./">重新开始</a>
+      <span id="coins" hidden>金币 0</span>
+    </header>
+    <p id="chapter" class="chapter">从家出发</p>
+    <h1 id="title">地下管网迷宫</h1>
+    <p id="room" class="room">洗手间暗门</p>
+    <p id="hint" class="hint" hidden></p>
+    <div id="scene" class="scene" data-theme="entry">
+      <svg id="map" viewBox="0 0 360 546" role="group" aria-label="地下六层通道总图"></svg>
+      <div id="story" class="story">
+        <div class="story-art" aria-hidden="true"></div>
+        <p>镜子后的门通向一段长楼梯。沿着台阶上的微光，去看看地下有什么。</p>
+      </div>
+    </div>
+    <p id="hazard" class="hazard" hidden></p>
+    <p id="status" class="status" role="status"></p>
+    <div id="actions" class="actions" aria-label="当前可做的事">
+      <button type="button" id="start">走下楼梯</button>
+    </div>
+  </main>
+</body>
+</html>

@@ -15,11 +15,11 @@ h1 { margin: 2px 0 8px; font-size: 1.55rem; }
 #status { margin: 0 0 8px; min-height: 2.8em; }
 .actions { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
 button { flex: 1 1 auto; min-height: 44px; padding: 5px 9px; color: inherit; background: #fffaed; border: 1px solid #9aab92; border-radius: 8px; font: inherit; cursor: pointer; }
-#controls button { background: #d9e5cd; touch-action: none; user-select: none; }
-#controls button:active { background: #adc398; }
 details { font-size: .86rem; }
 details p { margin: 4px 0; }
 @media (prefers-reduced-motion: reduce) {
   #scene #curtain, #scene #wing { animation: none; }
   #scene.warning #curtain, #scene.gust #curtain { transform: skewX(14deg); }
 }
+
+#sensor { font-size: .85rem; margin: 5px 0; color: #48644e; }

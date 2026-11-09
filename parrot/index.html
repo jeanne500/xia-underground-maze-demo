@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>鹦鹉走绳索 · 从家出发</title>
-  <link rel="stylesheet" href="style.css?v=overhead">
-  <script src="game.js?v=overhead" defer></script>
+  <link rel="stylesheet" href="style.css?v=tilt-only">
+  <script src="game.js?v=tilt-only" defer></script>
 </head>
 <body>
 <main>
@@ -33,11 +33,8 @@
   <p id="progress">客厅 · 窗边</p>
   <p id="status" role="status">鹦鹉站在窗边。要陪它走到水碗旁吗？</p>
   <div id="actions" class="actions"></div>
-  <div id="controls" class="actions" hidden>
-    <button type="button" id="left" aria-label="向左扶稳">← 向左扶</button>
-    <button type="button" id="right" aria-label="向右扶稳">向右扶 →</button>
-  </div>
-  <details><summary>操作提示</summary><p>鹦鹉往左歪，就向右扶。手机倾斜模式下，竖屏、屏幕朝上，像端小托盘一样轻轻倾斜。按钮可按住，电脑也可长按方向键。扶正后把手机放回水平，或松开按键，鹦鹉才会继续走。</p></details>
+  <p id="sensor">姿态感应：等待开启</p>
+  <details><summary>操作提示</summary><p>手机竖屏、屏幕朝上，像端小托盘。鹦鹉往左歪，就轻轻往右倾。扶正后把手机放回水平。</p></details>
 </main>
 </body>
 </html>

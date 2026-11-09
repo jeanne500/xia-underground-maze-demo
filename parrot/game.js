@@ -1,7 +1,7 @@
 "use strict";
 
 const elements = Object.fromEntries(
-  ["scene", "bird", "rope", "arrow", "progress", "status", "actions", "controls", "left", "right"]
+  ["scene", "bird", "rope", "arrow", "progress", "status", "actions", "sensor"]
     .map(id => [id, document.getElementById(id)]),
 );
 const platforms = [431, 250, 69];
@@ -9,7 +9,6 @@ const neutralThreshold = .16;
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 
 let state = "room";
-let mode = "buttons";
 let practiced = false;
 let practiceCentered = false;
 let completed = false;
@@ -20,7 +19,6 @@ let steady = 0;
 let gust = 0;
 let failures = 0;
 let assisted = false;
-let held = 0;
 let orientation;
 let baseline = 0;
 let calibration;
@@ -41,9 +39,7 @@ function message(text) {
 
 function show(next, text) {
   state = next;
-  held = 0;
   elements.actions.replaceChildren();
-  elements.controls.hidden = mode !== "buttons" || !["practice", "walking"].includes(next);
   if (text) message(text);
   elements.progress.textContent = {
     room: "客厅 · 窗边",
@@ -51,8 +47,7 @@ function show(next, text) {
     done: "终点 · 窗边水碗",
   }[next] || `第 ${segment + 1} 段绳索 / 2`;
   if (next === "room") {
-    button("陪鹦鹉走绳索", () => begin("buttons"));
-    if ("DeviceOrientationEvent" in window) button("用手机倾斜", enableTilt);
+    button("开启感应，陪鹦鹉走绳索", enableTilt);
     return;
   }
   if (next === "ready") button("出发", () => calibrate(walk));
@@ -72,12 +67,6 @@ function show(next, text) {
     arrival = -.65;
     message("鹦鹉歪了歪头，蹭蹭你的手。");
   });
-  if (mode === "tilt" && next === "calibrating") button("改用按钮", () => {
-    const resume = calibration.resume;
-    calibration = null;
-    mode = "buttons";
-    resume();
-  });
   button("回到房间", reset);
 }
 
@@ -85,20 +74,17 @@ function reset() {
   segment = position = balance = steady = gust = failures = arrival = 0;
   assisted = false;
   calibration = null;
+  orientation = null;
+  elements.sensor.textContent = "姿态感应：等待开启";
   show("room", "鹦鹉站在窗边。要陪它走到水碗旁吗？");
 }
 
 function calibrate(resume) {
-  if (mode === "buttons") {
-    resume();
-    return;
-  }
   calibration = { resume, elapsed: 0, stable: 0, anchor: undefined };
   show("calibrating", "请把手机竖着、屏幕朝上，拿稳一小会儿。");
 }
 
-function begin(inputMode) {
-  mode = inputMode;
+function begin() {
   calibrate(() => {
     if (practiced) {
       walk();
@@ -112,27 +98,36 @@ function begin(inputMode) {
 
 async function enableTilt() {
   if (preparingSensor) return;
+  if (!window.isSecureContext || !window.DeviceOrientationEvent) {
+    message("当前环境无法读取手机姿态。请用手机系统浏览器打开这条 HTTPS 试玩链接。");
+    return;
+  }
   preparingSensor = true;
   try {
     if (typeof DeviceOrientationEvent.requestPermission === "function") {
       if (await DeviceOrientationEvent.requestPermission() !== "granted") {
-        message("手机没有开启动作权限。可以点「陪鹦鹉走绳索」使用按钮。");
+        message("姿态权限未允许。请在浏览器中允许动作与方向访问，再重试。");
         return;
       }
     }
-    begin("tilt");
+    orientation = null;
+    elements.sensor.textContent = "姿态感应：等待手机数据";
+    begin();
   } catch {
-    message("这个浏览器没能开启倾斜。可以点「陪鹦鹉走绳索」使用按钮。");
+    message("浏览器没有开启姿态感应。请用手机系统浏览器打开链接后重试。");
   } finally {
     preparingSensor = false;
   }
 }
 
 window.addEventListener("deviceorientation", event => {
-  if (Number.isFinite(event.gamma) && Number.isFinite(event.beta)) {
+  if (state !== "room" && Number.isFinite(event.gamma) && Number.isFinite(event.beta)) {
     const radians = Math.PI / 180;
     const roll = Math.sin(event.gamma * radians) * Math.cos(event.beta * radians) / radians;
-    orientation = { roll, pitch: event.beta, time: performance.now() };
+    orientation = { roll, pitch: event.beta };
+    const reading = state === "calibrating" ? roll : roll - baseline;
+    const label = `姿态感应已连接 · ${reading > 0 ? "+" : ""}${Math.round(reading)}°`;
+    if (elements.sensor.textContent !== label) elements.sensor.textContent = label;
   }
 });
 
@@ -157,8 +152,7 @@ function checkpoint() {
 function tick(dt, time) {
   if (state === "calibrating") {
     calibration.elapsed += dt;
-    if (orientation && time - orientation.time < 500
-        && Math.abs(orientation.pitch) < 22 && Math.abs(orientation.roll) < 20) {
+    if (orientation && Math.abs(orientation.pitch) < 22 && Math.abs(orientation.roll) < 20) {
       if (!calibration.anchor || Math.abs(calibration.anchor.roll - orientation.roll) > 1.8
           || Math.abs(calibration.anchor.pitch - orientation.pitch) > 2.5) {
         calibration.anchor = orientation;
@@ -171,11 +165,17 @@ function tick(dt, time) {
         calibration = null;
         resume();
       }
+    } else {
+      calibration.stable = 0;
+      calibration.anchor = undefined;
     }
-    if (calibration?.elapsed > 3) message("还在等待稳定的姿态读数。也可以点「改用按钮」。");
+    if (calibration?.elapsed > 3) {
+      message(orientation ? "已收到姿态数据。请保持竖屏、屏幕朝上，平稳拿住。"
+        : "还没收到姿态数据。请轻倾手机试一下。如果读数仍不出现，请用 Safari 或 Chrome 打开分享链接并允许感应。");
+    }
     return;
   }
-  const input = mode === "buttons" ? held : clamp(((orientation?.roll ?? baseline) - baseline) / 13, -1, 1);
+  const input = clamp(((orientation?.roll ?? baseline) - baseline) / 13, -1, 1);
   if (state === "practice") {
     if (!practiceCentered) {
       balance = clamp(balance + input * dt * 1.8, -1, 1);
@@ -185,7 +185,7 @@ function tick(dt, time) {
       }
     }
     if (practiceCentered) {
-      message(mode === "tilt" ? "扶正了。现在把手机放回水平。" : "扶正了。现在松开方向按钮。");
+      message("扶正了。现在把手机放回水平。");
       if (Math.abs(input) <= neutralThreshold) {
         practiced = true;
         show("ready", "准备好了。点「出发」，鹦鹉会自己往上走。");
@@ -221,7 +221,7 @@ function tick(dt, time) {
   } else if (Math.abs(balance) > .42) {
     message(balance < 0 ? "鹦鹉向左歪，向右扶。" : "鹦鹉向右歪，向左扶。");
   } else if (Math.abs(balance) < .34 && !neutral) {
-    message(mode === "tilt" ? "扶正了，把手机放回水平。" : "扶正了，松开方向按钮。");
+    message("扶正了，把手机放回水平。");
   } else {
     message(warning ? "窗帘动了，风快来了。" : blowing ? "风吹过绳索了。" : "鹦鹉站稳后会继续往前走。");
   }
@@ -243,27 +243,7 @@ function draw(time) {
     ? (balance < 0 ? "→" : "←") : "";
 }
 
-for (const [id, direction] of [["left", -1], ["right", 1]]) {
-  const control = elements[id];
-  control.addEventListener("pointerdown", event => {
-    control.setPointerCapture(event.pointerId);
-    held = direction;
-  });
-  for (const event of ["pointerup", "pointercancel", "lostpointercapture"]) {
-    control.addEventListener(event, () => { if (held === direction) held = 0; });
-  }
-}
-window.addEventListener("keydown", event => {
-  if (mode !== "buttons" || !["practice", "walking"].includes(state)) return;
-  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-  event.preventDefault();
-  held = event.key === "ArrowLeft" ? -1 : 1;
-});
-window.addEventListener("keyup", event => {
-  if ((event.key === "ArrowLeft" && held < 0) || (event.key === "ArrowRight" && held > 0)) held = 0;
-});
 window.addEventListener("blur", () => {
-  held = 0;
   if (state === "walking") show("paused", "已暂停。准备好后点「继续」。");
 });
 

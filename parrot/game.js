@@ -6,6 +6,7 @@ const elements = Object.fromEntries(
 );
 const platforms = [431, 250, 69];
 const neutralThreshold = .16;
+const forwardThreshold = 5;
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 
 let state = "room";
@@ -20,7 +21,7 @@ let gust = 0;
 let failures = 0;
 let assisted = false;
 let orientation;
-let baseline = 0;
+let baseline = { roll: 0, pitch: 0 };
 let calibration;
 let arrival = 0;
 let preparingSensor = false;
@@ -125,15 +126,16 @@ window.addEventListener("deviceorientation", event => {
     const radians = Math.PI / 180;
     const roll = Math.sin(event.gamma * radians) * Math.cos(event.beta * radians) / radians;
     orientation = { roll, pitch: event.beta };
-    const reading = state === "calibrating" ? roll : roll - baseline;
-    const label = `姿态感应已连接 · ${reading > 0 ? "+" : ""}${Math.round(reading)}°`;
+    const reading = state === "calibrating" ? roll : roll - baseline.roll;
+    const forward = state === "calibrating" ? -event.beta : baseline.pitch - event.beta;
+    const label = `姿态感应已连接 · ${reading > 0 ? "+" : ""}${Math.round(reading)}° 横倾 · ${Math.round(forward)}° 前倾`;
     if (elements.sensor.textContent !== label) elements.sensor.textContent = label;
   }
 });
 
 function walk() {
   balance = steady = 0;
-  show("walking", "稳住鹦鹉，它会自己往前走。");
+  show("walking", "轻压手机顶端，鹦鹉就往前走。手机放平时停下。");
 }
 
 function checkpoint() {
@@ -160,7 +162,7 @@ function tick(dt, time) {
       }
       calibration.stable += dt;
       if (calibration.stable >= .45) {
-        baseline = orientation.roll;
+        baseline = orientation;
         const resume = calibration.resume;
         calibration = null;
         resume();
@@ -175,7 +177,9 @@ function tick(dt, time) {
     }
     return;
   }
-  const input = clamp(((orientation?.roll ?? baseline) - baseline) / 13, -1, 1);
+  const input = clamp(((orientation?.roll ?? baseline.roll) - baseline.roll) / 13, -1, 1);
+  const forward = baseline.pitch - (orientation?.pitch ?? baseline.pitch);
+  const movingForward = forward >= forwardThreshold;
   if (state === "practice") {
     if (!practiceCentered) {
       balance = clamp(balance + input * dt * 1.8, -1, 1);
@@ -186,9 +190,9 @@ function tick(dt, time) {
     }
     if (practiceCentered) {
       message("扶正了。现在把手机放回水平。");
-      if (Math.abs(input) <= neutralThreshold) {
+      if (Math.abs(input) <= neutralThreshold && Math.abs(forward) < forwardThreshold) {
         practiced = true;
-        show("ready", "准备好了。点「出发」，鹦鹉会自己往上走。");
+        show("ready", "准备好了。点「出发」，再轻压手机顶端让鹦鹉往前走。");
       }
     }
     return;
@@ -214,16 +218,16 @@ function tick(dt, time) {
   }
   const neutral = Math.abs(input) <= neutralThreshold;
   steady = Math.abs(balance) < .34 && neutral ? steady + dt : 0;
-  if (steady > .28) position += dt * .115;
+  if (steady > .28 && movingForward) position += dt * .115;
   if (position >= 1) {
     position = 1;
     checkpoint();
   } else if (Math.abs(balance) > .42) {
     message(balance < 0 ? "鹦鹉向左歪，向右扶。" : "鹦鹉向右歪，向左扶。");
   } else if (Math.abs(balance) < .34 && !neutral) {
-    message("扶正了，把手机放回水平。");
+    message("扶正了，把手机左右摆平，再轻压顶端。");
   } else {
-    message(warning ? "窗帘动了，风快来了。" : blowing ? "风吹过绳索了。" : "鹦鹉站稳后会继续往前走。");
+    message(warning ? "窗帘动了，风快来了。" : blowing ? "风吹过绳索了。" : movingForward ? "鹦鹉正在向前走。" : "手机放平时停下。轻压手机顶端向前走。");
   }
 }
 

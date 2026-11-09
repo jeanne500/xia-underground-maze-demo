@@ -1,0 +1,25 @@
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: #f5edda; color: #30473b; font: 16px/1.4 system-ui, sans-serif; }
+main { max-width: 460px; margin: auto; padding: 10px 14px; }
+header a { color: #48644e; font-size: .84rem; }
+h1 { margin: 2px 0 8px; font-size: 1.55rem; }
+#scene { display: block; width: 100%; max-height: 43dvh; border-radius: 12px; background: #eee0c3; }
+#arrow { fill: #633b2b; font-size: 34px; font-weight: bold; }
+#curtain { transform-origin: 95px 18px; }
+#scene.warning #curtain, #scene.gust #curtain { animation: ripple .45s ease-in-out infinite alternate; }
+#scene.gust #wing { animation: flap .18s ease-in-out infinite alternate; transform-origin: -6px -23px; }
+@keyframes ripple { to { transform: skewX(14deg); } }
+@keyframes flap { to { transform: rotate(-45deg); } }
+#progress { font-weight: 700; margin: 8px 0 2px; }
+#status { margin: 0 0 8px; min-height: 2.8em; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+button { flex: 1 1 auto; min-height: 44px; padding: 5px 9px; color: inherit; background: #fffaed; border: 1px solid #9aab92; border-radius: 8px; font: inherit; cursor: pointer; }
+#controls button { background: #d9e5cd; touch-action: none; user-select: none; }
+#controls button:active { background: #adc398; }
+details { font-size: .86rem; }
+details p { margin: 4px 0; }
+@media (prefers-reduced-motion: reduce) {
+  #scene #curtain, #scene #wing { animation: none; }
+  #scene.warning #curtain, #scene.gust #curtain { transform: skewX(14deg); }
+}

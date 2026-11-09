@@ -17,15 +17,25 @@ p { margin: 0; font-size: .88rem; }
 button { min-height: 44px; padding: 5px 12px; border: 1px solid #a59775; border-radius: 8px; color: inherit; background: #343c33; font: inherit; cursor: pointer; }
 #map { display: block; width: 100%; height: 100%; touch-action: manipulation; cursor: pointer; }
 #map text { fill: #f7edda; text-anchor: middle; font-size: 13px; font-weight: 700; }
-.floor { fill: #ebd9b1; }
-.wall { fill: #334840; }
+.floor { fill: #467961; }
+.wall { fill: #e2bb70; }
 .entry { fill: #6096a0; }
-.exit { fill: #72a781; }
+.exit { fill: #b8dfaa; }
 .player { pointer-events: none; fill: #bd4a34; stroke: #fff4d5; stroke-width: 2; }
 #status { color: #efd29f; min-height: 1.35em; }
 :focus-visible { outline: 2px solid #ffe4a8; outline-offset: 2px; }
 
 .directions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .directions button { touch-action: manipulation; font-size: 1.25rem; }
-.reachable { fill: #fff2bc; }
+.reachable { fill: #80b99a; }
 .exit.reachable { fill: #a7db9a; }
+
+#status.complete {
+  padding: 7px 10px;
+  border: 1px solid #9adb9e;
+  border-radius: 8px;
+  background: #28533c;
+  color: #edffe8;
+  text-align: center;
+  font-weight: 750;
+}

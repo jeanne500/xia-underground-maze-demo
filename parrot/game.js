@@ -6,7 +6,9 @@ const elements = Object.fromEntries(
 );
 const platforms = [431, 250, 69];
 const neutralThreshold = .16;
-const forwardThreshold = 5;
+const forwardThreshold = 5 / 3;
+const levelPitchTolerance = 5;
+const walkingBalanceLimit = .34;
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 
 let state = "room";
@@ -190,7 +192,7 @@ function tick(dt, time) {
     }
     if (practiceCentered) {
       message("扶正了。现在把手机放回水平。");
-      if (Math.abs(input) <= neutralThreshold && Math.abs(forward) < forwardThreshold) {
+      if (Math.abs(input) <= neutralThreshold && Math.abs(forward) < levelPitchTolerance) {
         practiced = true;
         show("ready", "准备好了。点「出发」，再轻压手机顶端让鹦鹉往前走。");
       }
@@ -217,14 +219,14 @@ function tick(dt, time) {
     return;
   }
   const neutral = Math.abs(input) <= neutralThreshold;
-  steady = Math.abs(balance) < .34 && neutral ? steady + dt : 0;
+  steady = Math.abs(balance) < walkingBalanceLimit && neutral ? steady + dt : 0;
   if (steady > .28 && movingForward) position += dt * .115;
   if (position >= 1) {
     position = 1;
     checkpoint();
   } else if (Math.abs(balance) > .42) {
     message(balance < 0 ? "鹦鹉向左歪，向右扶。" : "鹦鹉向右歪，向左扶。");
-  } else if (Math.abs(balance) < .34 && !neutral) {
+  } else if (Math.abs(balance) < walkingBalanceLimit && !neutral) {
     message("扶正了，把手机左右摆平，再轻压顶端。");
   } else {
     message(warning ? "窗帘动了，风快来了。" : blowing ? "风吹过绳索了。" : movingForward ? "鹦鹉正在向前走。" : "手机放平时停下。轻压手机顶端向前走。");
@@ -243,6 +245,8 @@ function draw(time) {
   elements.arrow.setAttribute("y", clamp(y, 48, 452));
   elements.scene.classList.toggle("warning", state === "walking" && gust > 0 && gust < .8);
   elements.scene.classList.toggle("gust", state === "walking" && gust >= .8 && gust < 3);
+  elements.scene.classList.toggle("off-balance", ["practice", "walking"].includes(state)
+    && Math.abs(balance) >= walkingBalanceLimit);
   elements.arrow.textContent = ["practice", "walking"].includes(state) && Math.abs(balance) > .42
     ? (balance < 0 ? "→" : "←") : "";
 }

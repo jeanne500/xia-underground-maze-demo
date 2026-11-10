@@ -8,9 +8,9 @@ h1 { margin: 2px 0 8px; font-size: 1.55rem; }
 #arrow { fill: #633b2b; font-size: 34px; font-weight: bold; }
 #curtain { transform-origin: 245px 32px; }
 #scene.warning #curtain, #scene.gust #curtain { animation: ripple .45s ease-in-out infinite alternate; }
-#scene.gust #wing { animation: flap .18s ease-in-out infinite alternate; transform-origin: 0px 0px; }
+#scene.off-balance #wing { animation: flap .15s ease-in-out infinite alternate; transform-origin: 0px 0px; }
 @keyframes ripple { to { transform: skewX(14deg); } }
-@keyframes flap { to { transform: rotate(-45deg); } }
+@keyframes flap { from { transform: scaleX(1.12); } to { transform: scaleX(1.85) scaleY(.8); } }
 #progress { font-weight: 700; margin: 8px 0 2px; }
 #status { margin: 0 0 8px; min-height: 2.8em; }
 .actions { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
@@ -19,6 +19,7 @@ details { font-size: .86rem; }
 details p { margin: 4px 0; }
 @media (prefers-reduced-motion: reduce) {
   #scene #curtain, #scene #wing { animation: none; }
+  #scene.off-balance #wing { transform: scaleX(1.55); }
   #scene.warning #curtain, #scene.gust #curtain { transform: skewX(14deg); }
 }
 
